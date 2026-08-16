@@ -9,7 +9,7 @@ const sdPlugin = "com.swrobotics.facet.sdPlugin";
 export default {
 	input: "src/plugin.ts",
 	output: {
-		file: `${sdPlugin}/bin/plugin.js`,
+		file: `${sdPlugin}/bin/plugin.cjs`,
 		format: "cjs",
 		sourcemap: true,
 		sourcemapPathTransform: (rel) => rel.replace(/^\.\.[\\/]/, `../../src/`),

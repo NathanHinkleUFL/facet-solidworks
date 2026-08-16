@@ -66,6 +66,27 @@ const GLYPHS: Record<string, string> = {
 	centerline: "M3 12 H7 M10 12 H11 M14 12 H18 M20 12 H21",
 	bom: "M4 5 H20 V19 H4 Z M4 10 H20 M4 15 H20 M12 5 V19",
 	"edit-sheet": "M5 4 H13 V20 H5 Z M8 8 H11 M8 12 H11 M14 15 L19 10 L21 12 L16 17 H14 Z",
+
+	// XL-exclusive commands (Phase 1)
+	loft: "M8 4 H16 L14 10 H10 Z M12 10 V14 M10 14 H14 L16 20 H8 Z",
+	sweep: "M4 8 A12 5 0 0 1 20 8 M7 4 a3 3 0 1 0 0.1 0 M17 12 a3 3 0 1 0 0.1 0",
+	rib: "M9 4 H15 V12 H9 Z M12 12 V20",
+	draft: "M5 5 H19 V19 H5 Z M8 9 L16 19",
+	wrap: "M6 6 H18 V18 H6 Z M6 9 C10 6 14 12 18 9 M6 15 C10 12 14 18 18 15",
+	spline: "M4 18 C8 4 16 20 20 6 M4 18 m-1.5 0 a1.5 1.5 0 1 0 3 0 a1.5 1.5 0 1 0 -3 0 M20 6 m-1.5 0 a1.5 1.5 0 1 0 3 0 a1.5 1.5 0 1 0 -3 0",
+	ellipse: "M12 12 m-8 0 a8 5 0 1 0 16 0 a8 5 0 1 0 -16 0",
+	polygon: "M12 3 L19 7.5 V16.5 L12 21 L5 16.5 V7.5 Z",
+	point: "M12 12 m-2 0 a2 2 0 1 0 4 0 a2 2 0 1 0 -4 0 M12 5 V9 M12 15 V19 M5 12 H9 M15 12 H19",
+	"sketch-fillet": "M6 18 L6 12 A6 6 0 0 1 12 6 L18 6 M18 18 V6",
+	extend: "M6 12 H17 M14 9 L17 12 L14 15 M4 4 V20",
+	"circular-pattern": "M12 12 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0 M12 12 m-2 0 a2 2 0 1 0 4 0 a2 2 0 1 0 -4 0 M12 4 V8 M20 12 H16 M12 20 V16 M4 12 H8",
+	"smart-fasteners": "M10 4 h4 v4 h-4 Z M8 8 H16 V12 H8 Z M12 12 V20",
+	collision: "M4 12 H11 M8 9 L11 12 L8 15 M20 12 H13 M16 9 L13 12 L16 15",
+	"fix-float": "M11 4 H13 V11 L15 13 V15 H9 V13 L11 11 Z M12 15 V20",
+	auxiliary: "M5 5 H15 V15 H5 Z M9 9 L18 9 M15 6 L18 9 L15 12 M18 4 V14",
+	"broken-out": "M6 6 H18 V18 H6 Z M11 6 V9 L14 12 L11 15 V18",
+	crop: "M5 7 H9 M7 5 V9 M15 19 H19 M17 15 V21 M5 19 H9 M7 17 V21 M15 5 H19 M17 3 V9",
+	"add-sheet": "M5 5 H19 V19 H5 Z M12 9 V15 M9 12 H15",
 };
 
 const FALLBACK_GLYPH = "M12 12 m-7 0 a7 7 0 1 0 14 0 a7 7 0 1 0 -14 0"; // neutral ring

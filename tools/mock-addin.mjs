@@ -19,6 +19,8 @@ import { WebSocketServer } from "ws";
 const PORT = 8723;
 const here = dirname(fileURLToPath(import.meta.url));
 const catalog = JSON.parse(readFileSync(join(here, "..", "shared", "catalog.json"), "utf8"));
+// Layouts are keyed per device; grab titles from the first one (they're identical across devices).
+const firstDevice = Object.keys(catalog.layouts)[0] ?? "streamdeck_mk2";
 
 const SCENES = {
 	n: { layout: "none", docType: "none", title: "" },
@@ -50,7 +52,7 @@ function contextMsg(key) {
 function broadcastContext(key) {
 	current = key;
 	const msg = JSON.stringify(contextMsg(key));
-	const label = (catalog.layouts[SCENES[key].layout]?.title) ?? SCENES[key].layout;
+	const label = (catalog.layouts[firstDevice]?.[SCENES[key].layout]?.title) ?? SCENES[key].layout;
 	console.log(`→ context: ${label}  (layout="${SCENES[key].layout}", ${clients.size} client${clients.size === 1 ? "" : "s"})`);
 	for (const ws of clients) {
 		if (ws.readyState === ws.OPEN) ws.send(msg);

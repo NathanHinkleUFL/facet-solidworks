@@ -6,17 +6,26 @@
   "properties": {
     "meta": {
       "type": "object",
-      "required": ["version", "device", "grid"],
+      "required": ["version", "devices"],
       "properties": {
         "version": { "type": "integer" },
-        "device": { "type": "string" },
-        "grid": {
+        "devices": {
           "type": "object",
-          "required": ["cols", "rows", "slots"],
-          "properties": {
-            "cols": { "type": "integer" },
-            "rows": { "type": "integer" },
-            "slots": { "type": "integer" }
+          "additionalProperties": {
+            "type": "object",
+            "required": ["label", "grid"],
+            "properties": {
+              "label": { "type": "string" },
+              "grid": {
+                "type": "object",
+                "required": ["cols", "rows", "slots"],
+                "properties": {
+                  "cols": { "type": "integer" },
+                  "rows": { "type": "integer" },
+                  "slots": { "type": "integer" }
+                }
+              }
+            }
           }
         }
       }
@@ -25,13 +34,16 @@
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["title", "slots"],
-        "properties": {
-          "title": { "type": "string" },
-          "extends": { "type": "string" },
-          "slots": {
-            "type": "array",
-            "items": { "$ref": "#/definitions/binding" }
+        "additionalProperties": {
+          "type": "object",
+          "required": ["title", "slots"],
+          "properties": {
+            "title": { "type": "string" },
+            "extends": { "type": "string" },
+            "slots": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/binding" }
+            }
           }
         }
       }
