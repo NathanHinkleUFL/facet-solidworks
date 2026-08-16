@@ -1,21 +1,27 @@
 /**
  * Controller — the bridge between SolidWorks context and the physical keys.
  *
- * It owns the registry of live key instances (slot 0..14) and the current layout, listens to
- * the add-in bridge, and repaints the deck whenever context changes. The FacetKey action just
- * registers/unregisters keys and forwards presses here.
+ * It owns the registry of live key instances per device (MK.2 slots 0..14, XL slots 0..31) and
+ * the current layout, listens to the add-in bridge, and repaints each device's deck whenever
+ * context changes. The FacetKey action just registers/unregisters keys and forwards presses here.
  */
 import streamDeck, { type KeyAction } from "@elgato/streamdeck";
 import { bridge } from "./bridge";
-import { resolveLayout, SLOTS } from "./catalog";
+import { deviceKeyForGrid, resolveLayout } from "./catalog";
 import { renderKey, titleFor } from "./render";
 import type { Binding, ContextMsg, Layout } from "./types";
 
+interface DeviceState {
+	catalogKey: string;
+	keys: Map<number, KeyAction>;
+	slotById: Map<string, number>;
+	layout: Layout;
+}
+
 class Controller {
-	#keys = new Map<number, KeyAction>();
-	#slotById = new Map<string, number>();
+	#devices = new Map<string, DeviceState>();
+	#deviceOrder: string[] = [];
 	#layoutKey = "connecting";
-	#layout: Layout = resolveLayout("connecting");
 	#context: ContextMsg | null = null;
 	#contextFallback: NodeJS.Timeout | null = null;
 
@@ -56,33 +62,42 @@ class Controller {
 		}
 	}
 
-	registerKey(slot: number, action: KeyAction): void {
-		if (slot < 0 || slot >= SLOTS) return;
-		this.#keys.set(slot, action);
-		this.#slotById.set(action.id, slot);
-		void this.#paintSlot(slot);
+	registerKey(deviceId: string, slot: number, action: KeyAction): void {
+		const state = this.#stateFor(deviceId, action.device.size.columns, action.device.size.rows);
+		if (!state || slot < 0 || slot >= state.layout.slots.length) return;
+		state.keys.set(slot, action);
+		state.slotById.set(action.id, slot);
+		void this.#paintSlot(deviceId, slot);
 	}
 
 	/** Unregister by action id (WillDisappear doesn't expose coordinates). */
-	unregisterById(id: string): void {
-		const slot = this.#slotById.get(id);
+	unregisterById(deviceId: string, id: string): void {
+		const state = this.#devices.get(deviceId);
+		if (!state) return;
+		const slot = state.slotById.get(id);
 		if (slot === undefined) return;
-		this.#slotById.delete(id);
-		if (this.#keys.get(slot)?.id === id) this.#keys.delete(slot);
+		state.slotById.delete(id);
+		if (state.keys.get(slot)?.id === id) state.keys.delete(slot);
 	}
 
-	bindingAt(slot: number): Binding | undefined {
-		return this.#layout.slots[slot];
+	bindingAt(deviceId: string, slot: number): Binding | undefined {
+		return this.#devices.get(deviceId)?.layout.slots[slot];
 	}
 
 	get layoutKey(): string {
 		return this.#layoutKey;
 	}
 
+	/** Catalog device ids currently on deck — reported to the add-in in the `ready` message. */
+	knownDeviceIds(): string[] {
+		return [...this.#deviceOrder];
+	}
+
 	/** Handle a key press: run the bound command and give physical feedback. */
-	async press(slot: number, action: KeyAction): Promise<void> {
-		const b = this.bindingAt(slot);
-		if (!b) return;
+	async press(deviceId: string, slot: number, action: KeyAction): Promise<void> {
+		const state = this.#devices.get(deviceId);
+		const b = state?.layout.slots[slot];
+		if (!state || !b) return;
 
 		if (b.kind === "command" || b.kind === "new") {
 			streamDeck.logger.info(`Invoke '${b.swCommand ?? b.commandId}' (slot ${slot}, layout '${this.#layoutKey}')`);
@@ -105,28 +120,56 @@ class Controller {
 		);
 	}
 
+	/** Get or create the per-device registry, deriving its catalog grid from the SDK on first sight. */
+	#stateFor(deviceId: string, cols: number, rows: number): DeviceState | undefined {
+		let state = this.#devices.get(deviceId);
+		if (state) return state;
+
+		const catalogKey = deviceKeyForGrid(cols, rows);
+		if (!catalogKey) return undefined; // unsupported device — ignore its keys
+		state = {
+			catalogKey,
+			keys: new Map(),
+			slotById: new Map(),
+			layout: resolveLayout(catalogKey, this.#layoutKey),
+		};
+		this.#devices.set(deviceId, state);
+		this.#deviceOrder.push(deviceId);
+		bridge.reportDevice(catalogKey);
+		return state;
+	}
+
 	#applyContext(ctx: ContextMsg): void {
 		this.#context = ctx;
 		streamDeck.logger.info(
 			`Context → layout='${ctx.layout}' doc='${ctx.docTitle || "(none)"}' ` +
-				`inSketch=${ctx.inSketch} sel=${ctx.selection.count} | ${this.#keys.size}/15 keys placed`,
+				`inSketch=${ctx.inSketch} sel=${ctx.selection.count} | ${this.#deviceOrder.length} device(s)`,
 		);
 		this.#setLayout(ctx.layout);
 	}
 
 	#setLayout(key: string): void {
 		this.#layoutKey = key;
-		this.#layout = resolveLayout(key);
+		for (const state of this.#devices.values()) {
+			state.layout = resolveLayout(state.catalogKey, key);
+		}
 		void this.#paintAll();
 	}
 
 	async #paintAll(): Promise<void> {
-		await Promise.all([...this.#keys.keys()].map((slot) => this.#paintSlot(slot)));
+		await Promise.all([...this.#devices.keys()].map((deviceId) => this.#paintDevice(deviceId)));
 	}
 
-	async #paintSlot(slot: number): Promise<void> {
-		const action = this.#keys.get(slot);
-		const b = this.#layout.slots[slot];
+	async #paintDevice(deviceId: string): Promise<void> {
+		const state = this.#devices.get(deviceId);
+		if (!state) return;
+		await Promise.all([...state.keys.keys()].map((slot) => this.#paintSlot(deviceId, slot)));
+	}
+
+	async #paintSlot(deviceId: string, slot: number): Promise<void> {
+		const state = this.#devices.get(deviceId);
+		const action = state?.keys.get(slot);
+		const b = state?.layout.slots[slot];
 		if (!action || !b) return;
 		// The icon is the image; the name is Stream Deck's native title (SVG <text> isn't rendered).
 		await action.setImage(renderKey(b));

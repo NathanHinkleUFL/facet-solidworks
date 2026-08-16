@@ -22,9 +22,14 @@ export interface Layout {
 	slots: Binding[];
 }
 
+export interface DeviceSpec {
+	label: string;
+	grid: { cols: number; rows: number; slots: number };
+}
+
 export interface Catalog {
-	meta: { version: number; device: string; grid: { cols: number; rows: number; slots: number } };
-	layouts: Record<string, Layout>;
+	meta: { version: number; devices: Record<string, DeviceSpec> };
+	layouts: Record<string, Record<string, Layout>>;
 }
 
 /** Visual design tokens (mirrors shared/design-tokens.json). */

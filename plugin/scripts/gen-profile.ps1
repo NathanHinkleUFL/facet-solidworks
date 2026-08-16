@@ -1,62 +1,87 @@
 #requires -Version 5
 <#
-  Generates Facet.streamDeckProfile — a profile that fills all 15 keys of a 15-key Stream Deck
-  (MK.2 / original, DeviceType 0) with the FacetKey action, so a fresh install lays out the whole
-  deck automatically instead of the user hand-placing keys.
+  Generates the bundled .streamDeckProfile files — one per supported device — so a fresh install
+  lays out the whole deck automatically instead of the user hand-placing keys:
 
-  Output: <plugin>/Facet.streamDeckProfile  (a zip of <uuid>.sdProfile/...), referenced from the
-  manifest's Profiles[]. Mirrors the ProfilesV3 on-disk format.
+    Facet.streamDeckProfile    MK.2 (5x3, 15 keys, DeviceType 0)
+    FacetXL.streamDeckProfile  XL  (8x4, 32 keys, DeviceType 2)
+
+  Each profile fills every key with the FacetKey action (XL bottom row included — those keys can
+  be reassigned to personal/Bambu actions later). Output: <plugin>/<name>.streamDeckProfile (a
+  zip of <uuid>.sdProfile/...), referenced from the manifest's Profiles[].
+
+  Format: the legacy flat "Version 1.0" bundle that the app's ESDProfileOperationImportFromPlugin
+  importer accepts (exactly what the bundled Elgato tutorial plugin ships). The V3 page-folder
+  format is only used by the app's own first-run default profiles (a different import path).
+  DeviceModel must match the connected device's model id, since the importer aborts with
+  "no matching or required profiles found" otherwise. On import the app converts this legacy
+  bundle into ProfilesV3 on disk. Profiles are offered for install when the plugin is installed —
+  dev-link mode does NOT trigger the import prompt.
 #>
 param([string]$PluginDir = "$PSScriptRoot\..\com.swrobotics.facet.sdPlugin")
 $ErrorActionPreference = "Stop"
 
-$profUuid = "FACE7000-0000-4000-8000-000000000001"
-$pageUuid = "FACE7000-0000-4000-8000-000000000002"
-$pageLower = $pageUuid.ToLower()
+function New-FacetProfile {
+  param(
+    [Parameter(Mandatory)] [string] $Name,
+    [Parameter(Mandatory)] [string] $DeviceModel,
+    [Parameter(Mandatory)] [int]    $Cols,
+    [Parameter(Mandatory)] [int]    $Rows,
+    [Parameter(Mandatory)] [string] $ProfUuid
+  )
 
-# One FacetKey action per key. Coordinates are "col,row" across a 5x3 grid.
-$actions = [ordered]@{}
-foreach ($row in 0..2) {
-  foreach ($col in 0..4) {
-    $actions["$col,$row"] = [ordered]@{
-      ActionID    = "facecafe-0000-4000-8000-{0:x12}" -f ($row * 5 + $col)  # deterministic per slot
-      LinkedTitle = $true
-      Name        = "Facet Key"
-      Plugin      = [ordered]@{ Name = "Facet for SolidWorks"; UUID = "com.swrobotics.facet"; Version = "0.3.0.0" }
-      Resources   = $null
-      Settings    = @{}
-      State       = 0
-      States      = @([ordered]@{
-          FontFamily = ""; FontSize = 13; FontStyle = ""; FontUnderline = $false
-          OutlineThickness = 2; ShowTitle = $true; TitleAlignment = "bottom"; TitleColor = "#F2F5F8"
-        })
-      UUID        = "com.swrobotics.facet.key"
+  # One FacetKey action per key. Coordinates are "col,row" across the device's grid.
+  $actions = [ordered]@{}
+  foreach ($row in 0..($Rows - 1)) {
+    foreach ($col in 0..($Cols - 1)) {
+      $actions["$col,$row"] = [ordered]@{
+        Name     = "Facet Key"
+        Settings = @{}
+        State    = 0
+        States   = @([ordered]@{
+            FFamily        = ""
+            FSize          = "13"
+            FStyle         = ""
+            FUnderline     = "off"
+            Image          = ""
+            Title          = ""
+            TitleAlignment = "bottom"
+            TitleColor     = "#F2F5F8"
+            TitleShow      = "on"
+          })
+        UUID     = "com.swrobotics.facet.key"
+      }
     }
   }
+
+  $manifest = [ordered]@{
+    Actions              = $actions
+    DeviceModel          = $DeviceModel
+    InstalledByPluginUUID = "com.swrobotics.facet"
+    Name                 = $Name
+    PreconfiguredName    = $Name
+    Version              = "1.0"
+  }
+
+  # Build the folder structure in a temp dir.
+  $work = Join-Path $env:TEMP "facet-profile-$([guid]::NewGuid())"
+  $prof = Join-Path $work "$ProfUuid.sdProfile"
+  New-Item -ItemType Directory -Force -Path $prof | Out-Null
+
+  $manifest | ConvertTo-Json -Depth 12 -Compress | Set-Content (Join-Path $prof "manifest.json") -Encoding UTF8
+
+  # Zip the .sdProfile folder (at archive root) and name it .streamDeckProfile.
+  $out = Join-Path $PluginDir "$Name.streamDeckProfile"
+  if (Test-Path $out) { Remove-Item $out -Force }
+  $zip = Join-Path $work "Facet.zip"
+  Compress-Archive -Path $prof -DestinationPath $zip -Force
+  Move-Item $zip $out -Force
+  Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue
+
+  Write-Host "Wrote $out (Model $DeviceModel, ${Cols}x${Rows})"
 }
 
-$pageManifest = [ordered]@{ Controllers = @([ordered]@{ Actions = $actions }) }
-$topManifest = [ordered]@{
-  Name    = "Facet"
-  Version = "3.0"
-  Pages   = [ordered]@{ Current = $pageLower; Default = $pageLower; Pages = @($pageLower) }
-}
-
-# Build the folder structure in a temp dir.
-$work = Join-Path $env:TEMP "facet-profile-$([guid]::NewGuid())"
-$prof = Join-Path $work "$profUuid.sdProfile"
-$pageDir = Join-Path $prof "Profiles\$pageUuid"
-New-Item -ItemType Directory -Force -Path $pageDir | Out-Null
-
-$topManifest  | ConvertTo-Json -Depth 12 -Compress | Set-Content (Join-Path $prof "manifest.json") -Encoding UTF8
-$pageManifest | ConvertTo-Json -Depth 12 -Compress | Set-Content (Join-Path $pageDir "manifest.json") -Encoding UTF8
-
-# Zip the .sdProfile folder (at archive root) and name it .streamDeckProfile.
-$out = Join-Path $PluginDir "Facet.streamDeckProfile"
-if (Test-Path $out) { Remove-Item $out -Force }
-$zip = Join-Path $work "Facet.zip"
-Compress-Archive -Path $prof -DestinationPath $zip -Force
-Move-Item $zip $out -Force
-Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue
-
-Write-Host "Wrote $out"
+New-FacetProfile -Name "Facet"   -DeviceModel "20GAA9901" -Cols 5 -Rows 3 `
+  -ProfUuid "FACE7000-0000-4000-8000-000000000001"
+New-FacetProfile -Name "FacetXL" -DeviceModel "20GAT9901" -Cols 8 -Rows 4 `
+  -ProfUuid "FACE7100-0000-4000-8000-000000000001"

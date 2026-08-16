@@ -1,130 +1,291 @@
 {
   "$schema": "./catalog.schema.json",
   "meta": {
-    "version": 1,
-    "device": "streamdeck_mk2",
-    "grid": { "cols": 5, "rows": 3, "slots": 15 },
-    "notes": "Single source of truth: layout -> slot(0..14, row-major) -> binding. Slot 0 is always Home (top-left); slot 14 is always More (bottom-right). swCommand names are validated against the swCommands_e enum extracted from the installed SolidWorks interop (SOLIDWORKS 2025)."
+    "version": 2,
+    "devices": {
+      "streamdeck_mk2": { "label": "MK.2", "grid": { "cols": 5, "rows": 3, "slots": 15 } },
+      "streamdeck_mk2_xl": { "label": "XL", "grid": { "cols": 8, "rows": 4, "slots": 32 } }
+    },
+    "notes": "Single source of truth: device -> layout -> slot(0..n, row-major) -> binding. Slot 0 is always Home (top-left); slot n-1 is always More (bottom-right). XL bottom row (slots 24-31) is reserved for persistent/personal keys and Phase 5 Bambu slots. swCommand names are best-effort swCommands_e names; wrong ids simply no-op and flash ⚠ until validated against the installed SolidWorks interop."
   },
   "layouts": {
-    "none": {
-      "title": "Welcome",
-      "slots": [
-        { "kind": "home", "label": "Facet" },
-        { "kind": "command", "label": "New Part", "swCommand": "facet:newPart", "icon": "new-part" },
-        { "kind": "command", "label": "New Assembly", "swCommand": "facet:newAssembly", "icon": "new-assembly" },
-        { "kind": "command", "label": "New Drawing", "swCommand": "facet:newDrawing", "icon": "new-drawing" },
-        { "kind": "command", "label": "Open", "swCommand": "swCommands_Open", "icon": "open" },
-        { "kind": "empty" }, { "kind": "empty" }, { "kind": "info", "label": "Open a document\nto begin" }, { "kind": "empty" }, { "kind": "empty" },
-        { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" },
-        { "kind": "empty" }
-      ]
+    "streamdeck_mk2": {
+      "none": {
+        "title": "Welcome",
+        "slots": [
+          { "kind": "home", "label": "Facet" },
+          { "kind": "command", "label": "New Part", "swCommand": "facet:newPart", "icon": "new-part" },
+          { "kind": "command", "label": "New Assembly", "swCommand": "facet:newAssembly", "icon": "new-assembly" },
+          { "kind": "command", "label": "New Drawing", "swCommand": "facet:newDrawing", "icon": "new-drawing" },
+          { "kind": "command", "label": "Open", "swCommand": "swCommands_Open", "icon": "open" },
+          { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" },
+          { "kind": "info", "label": "Open a document\nto begin" },
+          { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" },
+          { "kind": "empty" }
+        ]
+      },
+
+      "part": {
+        "title": "Part",
+        "slots": [
+          { "kind": "home", "label": "Part" },
+          { "kind": "command", "label": "Sketch", "swCommand": "swCommands_Sketch", "icon": "sketch", "accent": true },
+          { "kind": "command", "label": "Extrude", "swCommand": "swCommands_Extrude", "icon": "extrude" },
+          { "kind": "command", "label": "Cut", "swCommand": "swCommands_ExtrudedCut", "icon": "cut" },
+          { "kind": "command", "label": "Revolve", "swCommand": "swCommands_RevolvedBossBase", "icon": "revolve" },
+          { "kind": "command", "label": "Fillet", "swCommand": "swCommands_Fillet", "icon": "fillet" },
+          { "kind": "command", "label": "Chamfer", "swCommand": "swCommands_Chamfer", "icon": "chamfer" },
+          { "kind": "command", "label": "Hole Wizard", "swCommand": "swCommands_HoleWizard", "icon": "hole" },
+          { "kind": "command", "label": "Shell", "swCommand": "swCommands_Shell", "icon": "shell" },
+          { "kind": "command", "label": "Plane", "swCommand": "swCommands_Plane", "icon": "plane" },
+          { "kind": "command", "label": "Mirror", "swCommand": "swCommands_Mirror", "icon": "mirror" },
+          { "kind": "command", "label": "Pattern", "swCommand": "swCommands_LinearPattern", "icon": "pattern" },
+          { "kind": "command", "label": "Measure", "swCommand": "swCommands_Measure", "icon": "measure" },
+          { "kind": "command", "label": "Section", "swCommand": "swCommands_SectionView", "icon": "section", "toggle": true },
+          { "kind": "more", "label": "More" }
+        ]
+      },
+
+      "part.selection": {
+        "title": "Part · Selection",
+        "extends": "part",
+        "slots": [
+          { "kind": "home", "label": "Part" },
+          { "kind": "command", "label": "Fillet", "swCommand": "swCommands_Fillet", "icon": "fillet", "accent": true },
+          { "kind": "command", "label": "Chamfer", "swCommand": "swCommands_Chamfer", "icon": "chamfer", "accent": true },
+          { "kind": "command", "label": "Measure", "swCommand": "swCommands_Measure", "icon": "measure" },
+          { "kind": "command", "label": "Extrude", "swCommand": "swCommands_Extrude", "icon": "extrude" },
+          { "kind": "command", "label": "Cut", "swCommand": "swCommands_ExtrudedCut", "icon": "cut" },
+          { "kind": "command", "label": "Shell", "swCommand": "swCommands_Shell", "icon": "shell" },
+          { "kind": "command", "label": "Hide", "swCommand": "swCommands_HideShowComponents", "icon": "hide" },
+          { "kind": "command", "label": "Normal To", "swCommand": "swCommands_NormalTo", "icon": "normal-to" },
+          { "kind": "command", "label": "Plane", "swCommand": "swCommands_Plane", "icon": "plane" },
+          { "kind": "command", "label": "Mirror", "swCommand": "swCommands_Mirror", "icon": "mirror" },
+          { "kind": "command", "label": "Pattern", "swCommand": "swCommands_LinearPattern", "icon": "pattern" },
+          { "kind": "command", "label": "Delete", "swCommand": "swCommands_Delete", "icon": "delete" },
+          { "kind": "command", "label": "Section", "swCommand": "swCommands_SectionView", "icon": "section", "toggle": true },
+          { "kind": "more", "label": "More" }
+        ]
+      },
+
+      "sketch": {
+        "title": "Sketch",
+        "slots": [
+          { "kind": "home", "label": "Sketch" },
+          { "kind": "command", "label": "Line", "swCommand": "swCommands_Line", "icon": "line" },
+          { "kind": "command", "label": "Rectangle", "swCommand": "swCommands_Rectangle", "icon": "rectangle" },
+          { "kind": "command", "label": "Circle", "swCommand": "swCommands_Circle", "icon": "circle" },
+          { "kind": "command", "label": "Arc", "swCommand": "swCommands_3PointArc", "icon": "arc" },
+          { "kind": "command", "label": "Slot", "swCommand": "swCommands_SketchSlot_Line", "icon": "slot" },
+          { "kind": "command", "label": "Dimension", "swCommand": "swCommands_SmartDimension", "icon": "dimension", "accent": true },
+          { "kind": "command", "label": "Trim", "swCommand": "swCommands_TrimEntities", "icon": "trim" },
+          { "kind": "command", "label": "Offset", "swCommand": "swCommands_OffsetEntities", "icon": "offset" },
+          { "kind": "command", "label": "Convert", "swCommand": "swCommands_ConvertEntities", "icon": "convert" },
+          { "kind": "command", "label": "Mirror", "swCommand": "swCommands_MirrorEntities", "icon": "mirror" },
+          { "kind": "command", "label": "Construction", "swCommand": "swCommands_ConstructionGeometry", "icon": "construction", "toggle": true },
+          { "kind": "command", "label": "Relations", "swCommand": "swCommands_AddRelation", "icon": "relations" },
+          { "kind": "command", "label": "Exit Sketch", "swCommand": "swCommands_Exit_Sketch", "icon": "exit-sketch", "accent": true, "commit": true },
+          { "kind": "more", "label": "More" }
+        ]
+      },
+
+      "assembly": {
+        "title": "Assembly",
+        "slots": [
+          { "kind": "home", "label": "Assembly" },
+          { "kind": "command", "label": "Insert", "swCommand": "swCommands_InsertComponents", "icon": "insert-component", "accent": true },
+          { "kind": "command", "label": "Mate", "swCommand": "swCommands_Mate", "icon": "mate", "accent": true },
+          { "kind": "command", "label": "Move", "swCommand": "swCommands_MoveComponent", "icon": "move" },
+          { "kind": "command", "label": "Rotate", "swCommand": "swCommands_RotateComponent", "icon": "rotate" },
+          { "kind": "command", "label": "Pattern", "swCommand": "swCommands_Component_Pattern_Linear", "icon": "pattern" },
+          { "kind": "command", "label": "Explode", "swCommand": "swCommands_ExplodedView", "icon": "explode" },
+          { "kind": "command", "label": "Interfere", "swCommand": "swCommands_InterferenceDetection", "icon": "interfere" },
+          { "kind": "command", "label": "Hide/Show", "swCommand": "swCommands_HideShowComponents", "icon": "hide", "toggle": true },
+          { "kind": "command", "label": "Isolate", "swCommand": "swCommands_Comp_Isolate", "icon": "isolate" },
+          { "kind": "command", "label": "Section", "swCommand": "swCommands_SectionView", "icon": "section", "toggle": true },
+          { "kind": "command", "label": "Measure", "swCommand": "swCommands_Measure", "icon": "measure" },
+          { "kind": "command", "label": "Transparency", "swCommand": "swCommands_ChangeTransparency", "icon": "transparency", "toggle": true },
+          { "kind": "command", "label": "Isometric", "swCommand": "swCommands_Isometric", "icon": "isometric" },
+          { "kind": "more", "label": "More" }
+        ]
+      },
+
+      "drawing": {
+        "title": "Drawing",
+        "slots": [
+          { "kind": "home", "label": "Drawing" },
+          { "kind": "command", "label": "Model View", "swCommand": "swCommands_ModelView", "icon": "model-view", "accent": true },
+          { "kind": "command", "label": "Projected", "swCommand": "swCommands_ProjectedView", "icon": "projected-view" },
+          { "kind": "command", "label": "Section", "swCommand": "swCommands_InsertDrawingviewSection", "icon": "section-view" },
+          { "kind": "command", "label": "Detail", "swCommand": "swCommands_DetailView", "icon": "detail-view" },
+          { "kind": "command", "label": "Dimension", "swCommand": "swCommands_SmartDimension", "icon": "dimension", "accent": true },
+          { "kind": "command", "label": "Note", "swCommand": "swCommands_Note", "icon": "note" },
+          { "kind": "command", "label": "Balloon", "swCommand": "swCommands_Balloon", "icon": "balloon" },
+          { "kind": "command", "label": "Auto Balloon", "swCommand": "swCommands_AutoBalloon", "icon": "auto-balloon" },
+          { "kind": "command", "label": "Center Mark", "swCommand": "swCommands_CenterMark", "icon": "center-mark" },
+          { "kind": "command", "label": "Centerline", "swCommand": "swCommands_Centerline", "icon": "centerline" },
+          { "kind": "command", "label": "BOM", "swCommand": "swCommands_BillOfMaterials", "icon": "bom" },
+          { "kind": "command", "label": "Edit Sheet", "swCommand": "swCommands_Edit_Sheet", "icon": "edit-sheet", "toggle": true },
+          { "kind": "command", "label": "Print", "swCommand": "swCommands_Print", "icon": "print" },
+          { "kind": "more", "label": "More" }
+        ]
+      }
     },
 
-    "part": {
-      "title": "Part",
-      "slots": [
-        { "kind": "home", "label": "Part" },
-        { "kind": "command", "label": "Sketch", "swCommand": "swCommands_Sketch", "icon": "sketch", "accent": true },
-        { "kind": "command", "label": "Extrude", "swCommand": "swCommands_Extrude", "icon": "extrude" },
-        { "kind": "command", "label": "Cut", "swCommand": "swCommands_ExtrudedCut", "icon": "cut" },
-        { "kind": "command", "label": "Revolve", "swCommand": "swCommands_RevolvedBossBase", "icon": "revolve" },
-        { "kind": "command", "label": "Fillet", "swCommand": "swCommands_Fillet", "icon": "fillet" },
-        { "kind": "command", "label": "Chamfer", "swCommand": "swCommands_Chamfer", "icon": "chamfer" },
-        { "kind": "command", "label": "Hole Wizard", "swCommand": "swCommands_HoleWizard", "icon": "hole" },
-        { "kind": "command", "label": "Shell", "swCommand": "swCommands_Shell", "icon": "shell" },
-        { "kind": "command", "label": "Plane", "swCommand": "swCommands_Plane", "icon": "plane" },
-        { "kind": "command", "label": "Mirror", "swCommand": "swCommands_Mirror", "icon": "mirror" },
-        { "kind": "command", "label": "Pattern", "swCommand": "swCommands_LinearPattern", "icon": "pattern" },
-        { "kind": "command", "label": "Measure", "swCommand": "swCommands_Measure", "icon": "measure" },
-        { "kind": "command", "label": "Section", "swCommand": "swCommands_SectionView", "icon": "section", "toggle": true },
-        { "kind": "more", "label": "More" }
-      ]
-    },
+    "streamdeck_mk2_xl": {
+      "none": {
+        "title": "Welcome",
+        "slots": [
+          { "kind": "home", "label": "Facet" },
+          { "kind": "command", "label": "New Part", "swCommand": "facet:newPart", "icon": "new-part" },
+          { "kind": "command", "label": "New Assembly", "swCommand": "facet:newAssembly", "icon": "new-assembly" },
+          { "kind": "command", "label": "New Drawing", "swCommand": "facet:newDrawing", "icon": "new-drawing" },
+          { "kind": "command", "label": "Open", "swCommand": "swCommands_Open", "icon": "open" },
+          { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" },
+          { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" },
+          { "kind": "info", "label": "Open a document\nto begin" },
+          { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" },
+          { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" },
+          { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }
+        ]
+      },
 
-    "part.selection": {
-      "title": "Part · Selection",
-      "extends": "part",
-      "slots": [
-        { "kind": "home", "label": "Part" },
-        { "kind": "command", "label": "Fillet", "swCommand": "swCommands_Fillet", "icon": "fillet", "accent": true },
-        { "kind": "command", "label": "Chamfer", "swCommand": "swCommands_Chamfer", "icon": "chamfer", "accent": true },
-        { "kind": "command", "label": "Measure", "swCommand": "swCommands_Measure", "icon": "measure" },
-        { "kind": "command", "label": "Extrude", "swCommand": "swCommands_Extrude", "icon": "extrude" },
-        { "kind": "command", "label": "Cut", "swCommand": "swCommands_ExtrudedCut", "icon": "cut" },
-        { "kind": "command", "label": "Shell", "swCommand": "swCommands_Shell", "icon": "shell" },
-        { "kind": "command", "label": "Hide", "swCommand": "swCommands_HideShowComponents", "icon": "hide" },
-        { "kind": "command", "label": "Normal To", "swCommand": "swCommands_NormalTo", "icon": "normal-to" },
-        { "kind": "command", "label": "Plane", "swCommand": "swCommands_Plane", "icon": "plane" },
-        { "kind": "command", "label": "Mirror", "swCommand": "swCommands_Mirror", "icon": "mirror" },
-        { "kind": "command", "label": "Pattern", "swCommand": "swCommands_LinearPattern", "icon": "pattern" },
-        { "kind": "command", "label": "Delete", "swCommand": "swCommands_Delete", "icon": "delete" },
-        { "kind": "command", "label": "Section", "swCommand": "swCommands_SectionView", "icon": "section", "toggle": true },
-        { "kind": "more", "label": "More" }
-      ]
-    },
+      "part": {
+        "title": "Part",
+        "slots": [
+          { "kind": "home", "label": "Part" },
+          { "kind": "command", "label": "Sketch", "swCommand": "swCommands_Sketch", "icon": "sketch", "accent": true },
+          { "kind": "command", "label": "Extrude", "swCommand": "swCommands_Extrude", "icon": "extrude" },
+          { "kind": "command", "label": "Cut", "swCommand": "swCommands_ExtrudedCut", "icon": "cut" },
+          { "kind": "command", "label": "Revolve", "swCommand": "swCommands_RevolvedBossBase", "icon": "revolve" },
+          { "kind": "command", "label": "Loft", "swCommand": "swCommands_Loft", "icon": "loft" },
+          { "kind": "command", "label": "Sweep", "swCommand": "swCommands_Sweep", "icon": "sweep" },
+          { "kind": "command", "label": "Fillet", "swCommand": "swCommands_Fillet", "icon": "fillet" },
+          { "kind": "command", "label": "Chamfer", "swCommand": "swCommands_Chamfer", "icon": "chamfer" },
+          { "kind": "command", "label": "Hole Wizard", "swCommand": "swCommands_HoleWizard", "icon": "hole" },
+          { "kind": "command", "label": "Shell", "swCommand": "swCommands_Shell", "icon": "shell" },
+          { "kind": "command", "label": "Rib", "swCommand": "swCommands_Rib", "icon": "rib" },
+          { "kind": "command", "label": "Draft", "swCommand": "swCommands_Draft", "icon": "draft" },
+          { "kind": "command", "label": "Plane", "swCommand": "swCommands_Plane", "icon": "plane" },
+          { "kind": "command", "label": "Mirror", "swCommand": "swCommands_Mirror", "icon": "mirror" },
+          { "kind": "command", "label": "Pattern", "swCommand": "swCommands_LinearPattern", "icon": "pattern" },
+          { "kind": "command", "label": "Measure", "swCommand": "swCommands_Measure", "icon": "measure" },
+          { "kind": "command", "label": "Section", "swCommand": "swCommands_SectionView", "icon": "section", "toggle": true },
+          { "kind": "command", "label": "Wrap", "swCommand": "swCommands_Wrap", "icon": "wrap" },
+          { "kind": "command", "label": "Normal To", "swCommand": "swCommands_NormalTo", "icon": "normal-to" },
+          { "kind": "command", "label": "Isometric", "swCommand": "swCommands_Isometric", "icon": "isometric" },
+          { "kind": "empty" }, { "kind": "empty" },
+          { "kind": "more", "label": "More" },
+          { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }
+        ]
+      },
 
-    "sketch": {
-      "title": "Sketch",
-      "slots": [
-        { "kind": "home", "label": "Sketch" },
-        { "kind": "command", "label": "Line", "swCommand": "swCommands_Line", "icon": "line" },
-        { "kind": "command", "label": "Rectangle", "swCommand": "swCommands_Rectangle", "icon": "rectangle" },
-        { "kind": "command", "label": "Circle", "swCommand": "swCommands_Circle", "icon": "circle" },
-        { "kind": "command", "label": "Arc", "swCommand": "swCommands_3PointArc", "icon": "arc" },
-        { "kind": "command", "label": "Slot", "swCommand": "swCommands_SketchSlot_Line", "icon": "slot" },
-        { "kind": "command", "label": "Dimension", "swCommand": "swCommands_SmartDimension", "icon": "dimension", "accent": true },
-        { "kind": "command", "label": "Trim", "swCommand": "swCommands_TrimEntities", "icon": "trim" },
-        { "kind": "command", "label": "Offset", "swCommand": "swCommands_OffsetEntities", "icon": "offset" },
-        { "kind": "command", "label": "Convert", "swCommand": "swCommands_ConvertEntities", "icon": "convert" },
-        { "kind": "command", "label": "Mirror", "swCommand": "swCommands_MirrorEntities", "icon": "mirror" },
-        { "kind": "command", "label": "Construction", "swCommand": "swCommands_ConstructionGeometry", "icon": "construction", "toggle": true },
-        { "kind": "command", "label": "Relations", "swCommand": "swCommands_AddRelation", "icon": "relations" },
-        { "kind": "command", "label": "Exit Sketch", "swCommand": "swCommands_Exit_Sketch", "icon": "exit-sketch", "accent": true, "commit": true },
-        { "kind": "more", "label": "More" }
-      ]
-    },
+      "part.selection": {
+        "title": "Part · Selection",
+        "extends": "part",
+        "slots": [
+          { "kind": "home", "label": "Part" },
+          { "kind": "command", "label": "Fillet", "swCommand": "swCommands_Fillet", "icon": "fillet", "accent": true },
+          { "kind": "command", "label": "Chamfer", "swCommand": "swCommands_Chamfer", "icon": "chamfer", "accent": true },
+          { "kind": "command", "label": "Measure", "swCommand": "swCommands_Measure", "icon": "measure" },
+          { "kind": "command", "label": "Extrude", "swCommand": "swCommands_Extrude", "icon": "extrude" },
+          { "kind": "command", "label": "Cut", "swCommand": "swCommands_ExtrudedCut", "icon": "cut" },
+          { "kind": "command", "label": "Shell", "swCommand": "swCommands_Shell", "icon": "shell" },
+          { "kind": "command", "label": "Delete", "swCommand": "swCommands_Delete", "icon": "delete" },
+          { "kind": "command", "label": "Hide", "swCommand": "swCommands_HideShowComponents", "icon": "hide" },
+          { "kind": "command", "label": "Normal To", "swCommand": "swCommands_NormalTo", "icon": "normal-to" },
+          { "kind": "command", "label": "Plane", "swCommand": "swCommands_Plane", "icon": "plane" },
+          { "kind": "command", "label": "Mirror", "swCommand": "swCommands_Mirror", "icon": "mirror" },
+          { "kind": "command", "label": "Pattern", "swCommand": "swCommands_LinearPattern", "icon": "pattern" },
+          { "kind": "command", "label": "Section", "swCommand": "swCommands_SectionView", "icon": "section", "toggle": true },
+          { "kind": "command", "label": "Isometric", "swCommand": "swCommands_Isometric", "icon": "isometric" },
+          { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" },
+          { "kind": "more", "label": "More" },
+          { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }
+        ]
+      },
 
-    "assembly": {
-      "title": "Assembly",
-      "slots": [
-        { "kind": "home", "label": "Assembly" },
-        { "kind": "command", "label": "Insert", "swCommand": "swCommands_InsertComponents", "icon": "insert-component", "accent": true },
-        { "kind": "command", "label": "Mate", "swCommand": "swCommands_Mate", "icon": "mate", "accent": true },
-        { "kind": "command", "label": "Move", "swCommand": "swCommands_MoveComponent", "icon": "move" },
-        { "kind": "command", "label": "Rotate", "swCommand": "swCommands_RotateComponent", "icon": "rotate" },
-        { "kind": "command", "label": "Pattern", "swCommand": "swCommands_Component_Pattern_Linear", "icon": "pattern" },
-        { "kind": "command", "label": "Explode", "swCommand": "swCommands_ExplodedView", "icon": "explode" },
-        { "kind": "command", "label": "Interfere", "swCommand": "swCommands_InterferenceDetection", "icon": "interfere" },
-        { "kind": "command", "label": "Hide/Show", "swCommand": "swCommands_HideShowComponents", "icon": "hide", "toggle": true },
-        { "kind": "command", "label": "Isolate", "swCommand": "swCommands_Comp_Isolate", "icon": "isolate" },
-        { "kind": "command", "label": "Section", "swCommand": "swCommands_SectionView", "icon": "section", "toggle": true },
-        { "kind": "command", "label": "Measure", "swCommand": "swCommands_Measure", "icon": "measure" },
-        { "kind": "command", "label": "Transparency", "swCommand": "swCommands_ChangeTransparency", "icon": "transparency", "toggle": true },
-        { "kind": "command", "label": "Isometric", "swCommand": "swCommands_Isometric", "icon": "isometric" },
-        { "kind": "more", "label": "More" }
-      ]
-    },
+      "sketch": {
+        "title": "Sketch",
+        "slots": [
+          { "kind": "home", "label": "Sketch" },
+          { "kind": "command", "label": "Line", "swCommand": "swCommands_Line", "icon": "line" },
+          { "kind": "command", "label": "Rectangle", "swCommand": "swCommands_Rectangle", "icon": "rectangle" },
+          { "kind": "command", "label": "Circle", "swCommand": "swCommands_Circle", "icon": "circle" },
+          { "kind": "command", "label": "Arc", "swCommand": "swCommands_3PointArc", "icon": "arc" },
+          { "kind": "command", "label": "Slot", "swCommand": "swCommands_SketchSlot_Line", "icon": "slot" },
+          { "kind": "command", "label": "Spline", "swCommand": "swCommands_Spline", "icon": "spline" },
+          { "kind": "command", "label": "Ellipse", "swCommand": "swCommands_Ellipse", "icon": "ellipse" },
+          { "kind": "command", "label": "Polygon", "swCommand": "swCommands_Polygon", "icon": "polygon" },
+          { "kind": "command", "label": "Point", "swCommand": "swCommands_SketchPoint", "icon": "point" },
+          { "kind": "command", "label": "Dimension", "swCommand": "swCommands_SmartDimension", "icon": "dimension", "accent": true },
+          { "kind": "command", "label": "Trim", "swCommand": "swCommands_TrimEntities", "icon": "trim" },
+          { "kind": "command", "label": "Offset", "swCommand": "swCommands_OffsetEntities", "icon": "offset" },
+          { "kind": "command", "label": "Convert", "swCommand": "swCommands_ConvertEntities", "icon": "convert" },
+          { "kind": "command", "label": "Mirror", "swCommand": "swCommands_MirrorEntities", "icon": "mirror" },
+          { "kind": "command", "label": "Construction", "swCommand": "swCommands_ConstructionGeometry", "icon": "construction", "toggle": true },
+          { "kind": "command", "label": "Relations", "swCommand": "swCommands_AddRelation", "icon": "relations" },
+          { "kind": "command", "label": "Sketch Fillet", "swCommand": "swCommands_SketchFillet", "icon": "sketch-fillet" },
+          { "kind": "command", "label": "Extend", "swCommand": "swCommands_ExtendEntities", "icon": "extend" },
+          { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" },
+          { "kind": "command", "label": "Exit Sketch", "swCommand": "swCommands_Exit_Sketch", "icon": "exit-sketch", "accent": true, "commit": true },
+          { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }
+        ]
+      },
 
-    "drawing": {
-      "title": "Drawing",
-      "slots": [
-        { "kind": "home", "label": "Drawing" },
-        { "kind": "command", "label": "Model View", "swCommand": "swCommands_ModelView", "icon": "model-view", "accent": true },
-        { "kind": "command", "label": "Projected", "swCommand": "swCommands_ProjectedView", "icon": "projected-view" },
-        { "kind": "command", "label": "Section", "swCommand": "swCommands_InsertDrawingviewSection", "icon": "section-view" },
-        { "kind": "command", "label": "Detail", "swCommand": "swCommands_DetailView", "icon": "detail-view" },
-        { "kind": "command", "label": "Dimension", "swCommand": "swCommands_SmartDimension", "icon": "dimension", "accent": true },
-        { "kind": "command", "label": "Note", "swCommand": "swCommands_Note", "icon": "note" },
-        { "kind": "command", "label": "Balloon", "swCommand": "swCommands_Balloon", "icon": "balloon" },
-        { "kind": "command", "label": "Auto Balloon", "swCommand": "swCommands_AutoBalloon", "icon": "auto-balloon" },
-        { "kind": "command", "label": "Center Mark", "swCommand": "swCommands_CenterMark", "icon": "center-mark" },
-        { "kind": "command", "label": "Centerline", "swCommand": "swCommands_Centerline", "icon": "centerline" },
-        { "kind": "command", "label": "BOM", "swCommand": "swCommands_BillOfMaterials", "icon": "bom" },
-        { "kind": "command", "label": "Edit Sheet", "swCommand": "swCommands_Edit_Sheet", "icon": "edit-sheet", "toggle": true },
-        { "kind": "command", "label": "Print", "swCommand": "swCommands_Print", "icon": "print" },
-        { "kind": "more", "label": "More" }
-      ]
+      "assembly": {
+        "title": "Assembly",
+        "slots": [
+          { "kind": "home", "label": "Assembly" },
+          { "kind": "command", "label": "Insert", "swCommand": "swCommands_InsertComponents", "icon": "insert-component", "accent": true },
+          { "kind": "command", "label": "Mate", "swCommand": "swCommands_Mate", "icon": "mate", "accent": true },
+          { "kind": "command", "label": "Move", "swCommand": "swCommands_MoveComponent", "icon": "move" },
+          { "kind": "command", "label": "Rotate", "swCommand": "swCommands_RotateComponent", "icon": "rotate" },
+          { "kind": "command", "label": "Pattern", "swCommand": "swCommands_Component_Pattern_Linear", "icon": "pattern" },
+          { "kind": "command", "label": "Circular Pattern", "swCommand": "swCommands_Component_Pattern_Circular", "icon": "circular-pattern" },
+          { "kind": "command", "label": "Smart Fasteners", "swCommand": "swCommands_SmartFasteners", "icon": "smart-fasteners" },
+          { "kind": "command", "label": "Explode", "swCommand": "swCommands_ExplodedView", "icon": "explode" },
+          { "kind": "command", "label": "Interfere", "swCommand": "swCommands_InterferenceDetection", "icon": "interfere" },
+          { "kind": "command", "label": "Collision", "swCommand": "swCommands_CollisionDetection", "icon": "collision" },
+          { "kind": "command", "label": "Hide/Show", "swCommand": "swCommands_HideShowComponents", "icon": "hide", "toggle": true },
+          { "kind": "command", "label": "Isolate", "swCommand": "swCommands_Comp_Isolate", "icon": "isolate" },
+          { "kind": "command", "label": "Section", "swCommand": "swCommands_SectionView", "icon": "section", "toggle": true },
+          { "kind": "command", "label": "Measure", "swCommand": "swCommands_Measure", "icon": "measure" },
+          { "kind": "command", "label": "Transparency", "swCommand": "swCommands_ChangeTransparency", "icon": "transparency", "toggle": true },
+          { "kind": "command", "label": "Isometric", "swCommand": "swCommands_Isometric", "icon": "isometric" },
+          { "kind": "command", "label": "Fix/Float", "swCommand": "swCommands_FixComponent", "icon": "fix-float" },
+          { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" },
+          { "kind": "more", "label": "More" },
+          { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }
+        ]
+      },
+
+      "drawing": {
+        "title": "Drawing",
+        "slots": [
+          { "kind": "home", "label": "Drawing" },
+          { "kind": "command", "label": "Model View", "swCommand": "swCommands_ModelView", "icon": "model-view", "accent": true },
+          { "kind": "command", "label": "Projected", "swCommand": "swCommands_ProjectedView", "icon": "projected-view" },
+          { "kind": "command", "label": "Section", "swCommand": "swCommands_InsertDrawingviewSection", "icon": "section-view" },
+          { "kind": "command", "label": "Detail", "swCommand": "swCommands_DetailView", "icon": "detail-view" },
+          { "kind": "command", "label": "Auxiliary", "swCommand": "swCommands_AuxiliaryView", "icon": "auxiliary" },
+          { "kind": "command", "label": "Broken-out", "swCommand": "swCommands_BrokenOutSectionView", "icon": "broken-out" },
+          { "kind": "command", "label": "Crop View", "swCommand": "swCommands_CropView", "icon": "crop" },
+          { "kind": "command", "label": "Dimension", "swCommand": "swCommands_SmartDimension", "icon": "dimension", "accent": true },
+          { "kind": "command", "label": "Note", "swCommand": "swCommands_Note", "icon": "note" },
+          { "kind": "command", "label": "Balloon", "swCommand": "swCommands_Balloon", "icon": "balloon" },
+          { "kind": "command", "label": "Auto Balloon", "swCommand": "swCommands_AutoBalloon", "icon": "auto-balloon" },
+          { "kind": "command", "label": "Center Mark", "swCommand": "swCommands_CenterMark", "icon": "center-mark" },
+          { "kind": "command", "label": "Centerline", "swCommand": "swCommands_Centerline", "icon": "centerline" },
+          { "kind": "command", "label": "BOM", "swCommand": "swCommands_BillOfMaterials", "icon": "bom" },
+          { "kind": "command", "label": "Edit Sheet", "swCommand": "swCommands_Edit_Sheet", "icon": "edit-sheet", "toggle": true },
+          { "kind": "command", "label": "Print", "swCommand": "swCommands_Print", "icon": "print" },
+          { "kind": "command", "label": "Add Sheet", "swCommand": "swCommands_AddSheet", "icon": "add-sheet" },
+          { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" },
+          { "kind": "more", "label": "More" },
+          { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }, { "kind": "empty" }
+        ]
+      }
     }
   }
 }

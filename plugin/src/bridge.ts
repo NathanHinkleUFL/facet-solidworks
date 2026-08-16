@@ -39,9 +39,15 @@ class AddinBridge extends EventEmitter {
 	#helloTimer: NodeJS.Timeout | null = null;
 	#nonce = 0;
 	#pending = new Map<string, { resolve: PendingResolver; timer: NodeJS.Timeout }>();
+	#device = "unknown";
 
 	get isConnected(): boolean {
 		return this.#connected;
+	}
+
+	/** Catalog device id(s) on deck (e.g. "streamdeck_mk2_xl"), reported to the add-in in `ready`. */
+	reportDevice(id: string): void {
+		this.#device = id;
 	}
 
 	/** Begin connecting (and keep reconnecting until stop()). */
@@ -166,7 +172,7 @@ class AddinBridge extends EventEmitter {
 		this.#socket = ws;
 		this.#connected = true;
 		this.#opening = false;
-		this.#send(ws, { v: 1, type: "ready", device: "streamdeck_mk2", pluginVersion: PLUGIN_VERSION });
+		this.#send(ws, { v: 1, type: "ready", device: this.#device, pluginVersion: PLUGIN_VERSION });
 		this.emit("connected");
 	}
 

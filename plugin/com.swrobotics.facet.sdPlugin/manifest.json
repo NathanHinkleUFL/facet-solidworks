@@ -10,7 +10,7 @@
 	"Description": "Context-aware SolidWorks commands on your Stream Deck. The deck follows you — Part, Sketch, Assembly, and Drawing tools appear automatically as you work.",
 	"Category": "Facet for SolidWorks",
 	"CategoryIcon": "imgs/plugin/category",
-	"CodePath": "bin/plugin.js",
+	"CodePath": "bin/plugin.cjs",
 	"Nodejs": {
 		"Version": "20"
 	},
@@ -28,7 +28,7 @@
 			"Name": "Facet Key",
 			"UUID": "com.swrobotics.facet.key",
 			"Icon": "imgs/actions/key/icon",
-			"Tooltip": "A context-aware SolidWorks key. Place this on every key of your MK.2; Facet decides what each one does based on what you're doing in SolidWorks.",
+			"Tooltip": "A context-aware SolidWorks key. Place this on every key of your MK.2 or XL; Facet decides what each one does based on what you're doing in SolidWorks.",
 			"Controllers": [
 				"Keypad"
 			],
@@ -49,6 +49,12 @@
 		{
 			"Name": "Facet",
 			"DeviceType": 0,
+			"Readonly": false,
+			"DontAutoSwitchWhenInstalled": false
+		},
+		{
+			"Name": "FacetXL",
+			"DeviceType": 2,
 			"Readonly": false,
 			"DontAutoSwitchWhenInstalled": false
 		}
